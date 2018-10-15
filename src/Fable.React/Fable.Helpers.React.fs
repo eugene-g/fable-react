@@ -813,6 +813,7 @@ open ServerRenderingInternal
 let inline from<'P> (com: ComponentClass<'P>) (props: 'P) (children: ReactElement seq): ReactElement =
     createElement(com, props, children)
 
+#if !FABLE_REPL_LIB
 /// Instantiate a component from a type inheriting React.Component
 /// Example: `ofType<MyComponent,_,_> { myProps = 5 } []`
 let inline ofType<'T,'P,'S when 'T :> Component<'P,'S>> (props: 'P) (children: ReactElement seq): ReactElement =
@@ -822,11 +823,11 @@ let inline ofType<'T,'P,'S when 'T :> Component<'P,'S>> (props: 'P) (children: R
     createServerElement(typeof<'T>, props, children, ServerElementType.Component)
 #endif
 
-
 /// OBSOLETE: Use `ofType`
 [<System.Obsolete("Use ofType")>]
 let inline com<'T,'P,'S when 'T :> Component<'P,'S>> (props: 'P) (children: ReactElement seq): ReactElement =
     ofType<'T, 'P, 'S> props children
+#endif
 
 /// Instantiate a stateless component from a function
 /// Example:
@@ -846,10 +847,12 @@ let inline ofFunction<'P> (f: 'P -> ReactElement) (props: 'P) (children: ReactEl
 let inline fn<'P> (f: 'P -> ReactElement) (props: 'P) (children: ReactElement seq): ReactElement =
     ofFunction f props children
 
+#if !FABLE_REPL_LIB
 /// Instantiate an imported React component. The first two arguments must be string literals, "default" can be used for the first one.
 /// Example: `ofImport "Map" "leaflet" { x = 10; y = 50 } []`
 let inline ofImport<'P> (importMember: string) (importPath: string) (props: 'P) (children: ReactElement seq): ReactElement =
     createElement(import importMember importPath, props, children)
+#endif
 
 #if FABLE_COMPILER
 /// Alias of `ofString`
@@ -1100,6 +1103,7 @@ type Fable.Import.React.FormEvent with
     member this.Value =
         unbox<string> this.target?value
 
+#if !FABLE_REPL_LIB
 // Helpers for ReactiveComponents (see #44)
 module ReactiveComponents =
     type Props<'P, 'S, 'Msg> = {
@@ -1152,3 +1156,4 @@ let reactiveCom<'P, 'S, 'Msg>
     ofType<ReactiveCom<'P, 'S, 'Msg>, Props<'P, 'S, 'Msg>, State<'S>>
         { key=key; props=props; update=update; view=view; init=init }
         children
+#endif
